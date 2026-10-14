@@ -190,3 +190,9 @@ A log of every prompt typed into Claude Code while working on this assignment, o
 > Okay let's move on to Problem 11: Submit to GitHub.
 > Push your code to a public GitHub repository so the graders of this assignment can clone it. Put the repo URL in output/github_url.txt.
 > Do not push your real .env to the GitHub repo. Do include both database files under data/ (the original and your working copy) so the graders can run your app easily.
+
+**Prompt 2:**
+> Please open the dashboard
+
+**Prompt 3:**
+> Looks great!!! Can you go back through every prompt and make sure you adhered to everything I specified, specifically where I call out what the graders are looking for?
