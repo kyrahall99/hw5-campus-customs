@@ -196,3 +196,11 @@ A log of every prompt typed into Claude Code while working on this assignment, o
 
 **Prompt 3:**
 > Looks great!!! Can you go back through every prompt and make sure you adhered to everything I specified, specifically where I call out what the graders are looking for?
+
+**Prompt 4:**
+> Thank you for catching that! Let's change the first prompt for ticket 103 to: "The SOM Club Hockey Team wants to make a bulk order of Navy hoodies. Do we have sufficient stock (20 larges and 20 mediums) to fulfill their order?"
+> Let's change the first prompt for ticket 101 to: "Are there any invoices that have not been paid to any of our vendors?"
+> Let's change the first prompt for ticket 102 to: "How much rent is due on lease 1 and when is it due?"
+> Let's change the second prompt for ticket 103 to: "How many size medium navy hoodies do we have in stock now that all three tickets have been resolved?"
+> Let's change the second prompt for ticket 101 to: "Does Bulldog Print Co (Vendor 1) have any open invoices at this point?"
+> Let's change the second prompt for ticket 102 to: "When is rent next due on lease 1 now that we have paid September?"

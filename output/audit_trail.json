@@ -11251,5 +11251,13 @@
         "Reassess the 12-unit restock only after sufficient funding is available; then confirm vendor timing before promising a delivery date."
       ]
     }
+  },
+  {
+    "logged_at": "2026-10-14T15:01:28+00:00",
+    "run_id": null,
+    "ticket_id": null,
+    "agent": "human",
+    "event": "db_reset",
+    "text": "data/campus_customs_new.db reset from data/campus_customs.db"
   }
 ]

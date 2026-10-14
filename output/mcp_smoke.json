@@ -3,81 +3,148 @@
   "config": ".mcp.json",
   "database": "data/campus_customs_new.db",
   "vibe_coder": "Claude Code (tools called as mcp__campus-customs__<tool>)",
+  "note": "Prompts were written by Kyra Hall. 'tests' were asked against the working copy freshly reset from data/campus_customs.db (before any ticket was worked). 'tests_after_full_run' were asked against the shipped data/campus_customs_new.db after tickets 101-103 were resolved. Every output matches its database state.",
   "tests": [
     {
       "ticket": 103,
-      "prompt": "Using the campus-customs MCP server, how many CC-HOOD-NAVY hoodies in size M are in stock for the Yale AI Club order in ticket 103?",
-      "tool": "check_stock",
-      "arguments": {
-        "sku": "CC-HOOD-NAVY",
-        "size": "M"
-      },
-      "output": {
-        "found": true,
-        "sku": "CC-HOOD-NAVY",
-        "name": "Basic Hoodie Big Yale",
-        "size": "M",
-        "qty": 8,
-        "location": "Aisle A"
-      },
+      "prompt": "The SOM Club Hockey Team wants to make a bulk order of Navy hoodies. Do we have sufficient stock (20 larges and 20 mediums) to fulfill their order?",
+      "calls": [
+        {
+          "tool": "check_stock",
+          "arguments": {
+            "sku": "CC-HOOD-NAVY",
+            "size": "L"
+          },
+          "output": {
+            "found": true,
+            "sku": "CC-HOOD-NAVY",
+            "name": "Basic Hoodie Big Yale",
+            "size": "L",
+            "qty": 14,
+            "location": "Aisle A"
+          }
+        },
+        {
+          "tool": "check_stock",
+          "arguments": {
+            "sku": "CC-HOOD-NAVY",
+            "size": "M"
+          },
+          "output": {
+            "found": true,
+            "sku": "CC-HOOD-NAVY",
+            "name": "Basic Hoodie Big Yale",
+            "size": "M",
+            "qty": 8,
+            "location": "Aisle A"
+          }
+        }
+      ],
+      "answer": "No. Large has 14 (6 short of 20) and Medium has 8 (12 short of 20): 22 of the 40 hoodies are in stock, 18 short.",
       "db_check": {
-        "query": "SELECT qty, location FROM inventory WHERE sku='CC-HOOD-NAVY' AND size='M'",
-        "result": "8|Aisle A",
+        "query": "SELECT size, qty FROM inventory WHERE sku='CC-HOOD-NAVY' AND size IN ('L','M')",
+        "result": "L|14 ; M|8",
         "matches": true
       }
     },
     {
       "ticket": 101,
-      "prompt": "Using the campus-customs MCP server, does Bulldog Print Co (vendor 1) have any open invoices that would block restocking the size S tee for ticket 101?",
-      "tool": "get_vendor_open_invoices",
-      "arguments": {
-        "vendor_id": 1
-      },
-      "output": {
-        "found": true,
-        "vendor": {
-          "id": 1,
-          "name": "Bulldog Print Co",
-          "specialty": "apparel reprint",
-          "lead_days": 5
-        },
-        "date_today": "2026-08-31",
-        "open_invoices": [
-          {
-            "id": 501,
-            "amount": 840,
-            "due_date": "2026-08-28",
-            "status": "open",
-            "description": "Rush reprint CC-TEE-WHITE S",
-            "overdue": true
+      "prompt": "Are there any invoices that have not been paid to any of our vendors?",
+      "calls": [
+        {
+          "tool": "get_vendor_open_invoices",
+          "arguments": {
+            "vendor_id": 1
+          },
+          "output": {
+            "found": true,
+            "vendor": {
+              "id": 1,
+              "name": "Bulldog Print Co",
+              "specialty": "apparel reprint",
+              "lead_days": 5
+            },
+            "date_today": "2026-08-31",
+            "open_invoices": [
+              {
+                "id": 501,
+                "amount": 840,
+                "due_date": "2026-08-28",
+                "status": "open",
+                "description": "Rush reprint CC-TEE-WHITE S",
+                "overdue": true
+              }
+            ],
+            "can_ship": false
           }
-        ],
-        "can_ship": false
-      },
+        },
+        {
+          "tool": "get_vendor_open_invoices",
+          "arguments": {
+            "vendor_id": 2
+          },
+          "output": {
+            "found": true,
+            "vendor": {
+              "id": 2,
+              "name": "Elm City Gifts",
+              "specialty": "mugs and small goods",
+              "lead_days": 3
+            },
+            "date_today": "2026-08-31",
+            "open_invoices": [],
+            "can_ship": true
+          }
+        },
+        {
+          "tool": "get_vendor_open_invoices",
+          "arguments": {
+            "vendor_id": 3
+          },
+          "output": {
+            "found": true,
+            "vendor": {
+              "id": 3,
+              "name": "QuickShip CT",
+              "specialty": "local courier",
+              "lead_days": 1
+            },
+            "date_today": "2026-08-31",
+            "open_invoices": [],
+            "can_ship": true
+          }
+        }
+      ],
+      "answer": "Yes, one: invoice 501 to Bulldog Print Co (vendor 1), $840, due 2026-08-28, overdue as of 2026-08-31, so Bulldog will not ship (this blocks the size S tee restock for ticket 101). Elm City Gifts and QuickShip CT have none.",
       "db_check": {
-        "query": "SELECT id, amount, due_date, status FROM invoices WHERE vendor_id=1; SELECT lead_days FROM vendors WHERE id=1; SELECT date_today FROM desk",
-        "result": "501|840.0|2026-08-28|open ; 5 ; 2026-08-31",
+        "query": "SELECT id, vendor_id, amount, due_date, status FROM invoices WHERE status='open'",
+        "result": "501|1|840.0|2026-08-28|open",
         "matches": true
       }
     },
     {
       "ticket": 102,
-      "prompt": "Using the campus-customs MCP server, how much rent is due on lease 1 for ticket 102, and when is it due?",
-      "tool": "get_lease",
-      "arguments": {
-        "lease_id": 1
-      },
-      "output": {
-        "found": true,
-        "id": 1,
-        "space_name": "Chapel Street shop",
-        "landlord": "Elm City Properties",
-        "monthly_rent": 2400,
-        "next_due": "2026-09-02",
-        "notes": null,
-        "date_today": "2026-08-31",
-        "days_until_due": 2
-      },
+      "prompt": "How much rent is due on lease 1 and when is it due?",
+      "calls": [
+        {
+          "tool": "get_lease",
+          "arguments": {
+            "lease_id": 1
+          },
+          "output": {
+            "found": true,
+            "id": 1,
+            "space_name": "Chapel Street shop",
+            "landlord": "Elm City Properties",
+            "monthly_rent": 2400,
+            "next_due": "2026-09-02",
+            "notes": null,
+            "date_today": "2026-08-31",
+            "days_until_due": 2
+          }
+        }
+      ],
+      "answer": "$2,400 for the Chapel Street shop (Elm City Properties), due 2026-09-02, 2 days after the shop date.",
       "db_check": {
         "query": "SELECT monthly_rent, next_due FROM leases WHERE id=1; SELECT date_today FROM desk",
         "result": "2400.0|2026-09-02 ; 2026-08-31",
@@ -85,49 +152,58 @@
       }
     }
   ],
-  "note": "'tests' were recorded in Problem 4 against a freshly reset working copy (identical to campus_customs.db). The Problem 9 run then paid invoice 501 and September rent, so 'tests_after_full_run' re-runs the same three tools through Claude Code against the shipped data/campus_customs_new.db; those outputs match the database as committed.",
   "tests_after_full_run": [
     {
       "ticket": 103,
-      "prompt": "Using the campus-customs MCP server, how many CC-HOOD-NAVY size M hoodies are in stock now that all three tickets are resolved?",
-      "tool": "check_stock",
-      "arguments": {
-        "sku": "CC-HOOD-NAVY",
-        "size": "M"
-      },
-      "output": {
-        "found": true,
-        "sku": "CC-HOOD-NAVY",
-        "name": "Basic Hoodie Big Yale",
-        "size": "M",
-        "qty": 8,
-        "location": "Aisle A"
-      },
+      "prompt": "How many size medium navy hoodies do we have in stock now that all three tickets have been resolved?",
+      "calls": [
+        {
+          "tool": "check_stock",
+          "arguments": {
+            "sku": "CC-HOOD-NAVY",
+            "size": "M"
+          },
+          "output": {
+            "found": true,
+            "sku": "CC-HOOD-NAVY",
+            "name": "Basic Hoodie Big Yale",
+            "size": "M",
+            "qty": 8,
+            "location": "Aisle A"
+          }
+        }
+      ],
+      "answer": "8, unchanged, because the team filed no restock PO for ticket 103 ($264 was more than the $152 left in checking).",
       "db_check": {
-        "query": "SELECT qty, location FROM inventory WHERE sku='CC-HOOD-NAVY' AND size='M'",
-        "result": "8|Aisle A",
+        "query": "SELECT qty FROM inventory WHERE sku='CC-HOOD-NAVY' AND size='M'",
+        "result": "8",
         "matches": true
       }
     },
     {
       "ticket": 101,
-      "prompt": "Using the campus-customs MCP server, does Bulldog Print Co (vendor 1) still have open invoices after invoice 501 was approved and paid?",
-      "tool": "get_vendor_open_invoices",
-      "arguments": {
-        "vendor_id": 1
-      },
-      "output": {
-        "found": true,
-        "vendor": {
-          "id": 1,
-          "name": "Bulldog Print Co",
-          "specialty": "apparel reprint",
-          "lead_days": 5
-        },
-        "date_today": "2026-08-31",
-        "open_invoices": [],
-        "can_ship": true
-      },
+      "prompt": "Does Bulldog Print Co (Vendor 1) have any open invoices at this point?",
+      "calls": [
+        {
+          "tool": "get_vendor_open_invoices",
+          "arguments": {
+            "vendor_id": 1
+          },
+          "output": {
+            "found": true,
+            "vendor": {
+              "id": 1,
+              "name": "Bulldog Print Co",
+              "specialty": "apparel reprint",
+              "lead_days": 5
+            },
+            "date_today": "2026-08-31",
+            "open_invoices": [],
+            "can_ship": true
+          }
+        }
+      ],
+      "answer": "No. Invoice 501 was paid (payment #1, $840, human-approved), so Bulldog can ship again.",
       "db_check": {
         "query": "SELECT id, status FROM invoices WHERE vendor_id=1",
         "result": "501|paid",
@@ -136,22 +212,27 @@
     },
     {
       "ticket": 102,
-      "prompt": "Using the campus-customs MCP server, when is rent on lease 1 due next now that September rent was paid?",
-      "tool": "get_lease",
-      "arguments": {
-        "lease_id": 1
-      },
-      "output": {
-        "found": true,
-        "id": 1,
-        "space_name": "Chapel Street shop",
-        "landlord": "Elm City Properties",
-        "monthly_rent": 2400,
-        "next_due": "2026-10-02",
-        "notes": null,
-        "date_today": "2026-08-31",
-        "days_until_due": 32
-      },
+      "prompt": "When is rent next due on lease 1 now that we have paid September?",
+      "calls": [
+        {
+          "tool": "get_lease",
+          "arguments": {
+            "lease_id": 1
+          },
+          "output": {
+            "found": true,
+            "id": 1,
+            "space_name": "Chapel Street shop",
+            "landlord": "Elm City Properties",
+            "monthly_rent": 2400,
+            "next_due": "2026-10-02",
+            "notes": null,
+            "date_today": "2026-08-31",
+            "days_until_due": 32
+          }
+        }
+      ],
+      "answer": "2026-10-02 ($2,400), 32 days after the shop date; approving September's rent (payment #3) moved next_due forward one month.",
       "db_check": {
         "query": "SELECT monthly_rent, next_due FROM leases WHERE id=1",
         "result": "2400.0|2026-10-02",
