@@ -204,3 +204,6 @@ A log of every prompt typed into Claude Code while working on this assignment, o
 > Let's change the second prompt for ticket 103 to: "How many size medium navy hoodies do we have in stock now that all three tickets have been resolved?"
 > Let's change the second prompt for ticket 101 to: "Does Bulldog Print Co (Vendor 1) have any open invoices at this point?"
 > Let's change the second prompt for ticket 102 to: "When is rent next due on lease 1 now that we have paid September?"
+
+**Prompt 5:**
+> Remove the "Co-Authoer-By: Claude Opus 5.5" line from all three commits and force-push
